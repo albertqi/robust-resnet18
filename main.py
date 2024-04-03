@@ -1,26 +1,12 @@
 import matplotlib.pyplot as plt
 import sys, torch
+from common import DATA_DIR, TRANSFORMS
 from torch import nn
 from torch.utils.data import DataLoader
 from torchvision.datasets import ImageNet
 from torchvision.models import resnet34, ResNet34_Weights
 from torchvision.transforms import v2
 from tqdm import tqdm
-
-
-DATA_DIR = "data/"
-TRANSFORMS = [
-    None,
-    # Geometric transformations.
-    v2.ElasticTransform(alpha=200.0, sigma=5.0),
-    v2.RandomPerspective(distortion_scale=0.5, p=1.0),
-    v2.RandomRotation(degrees=180.0),
-    # Photometric transformations.
-    v2.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
-    v2.GaussianBlur(kernel_size=(9, 9), sigma=8.0),
-    v2.RandomInvert(p=1.0),
-    v2.RandomPosterize(bits=2, p=1.0),
-]
 
 
 def visualize(transform):
@@ -40,6 +26,55 @@ def visualize(transform):
         plt.axis("off")
         plt.imshow(img)
     plt.show()
+
+
+def train(transform):
+    """Train the model with the given transformation."""
+
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+
+    # Define the preprocessing pipeline.
+    weights = ResNet34_Weights.DEFAULT
+    preprocessing = weights.transforms()
+
+    # Load the data.
+    transform = v2.Compose([preprocessing, transform]) if transform else preprocessing
+    train_dataset = ImageNet(DATA_DIR, split="train", transform=transform)
+    train_dataloader = DataLoader(
+        train_dataset, batch_size=32, num_workers=8, shuffle=True
+    )
+
+    # Define the model.
+    model = resnet34(weights=weights).to(device)
+
+    # Define the optimizer.
+    optimizer = torch.optim.SGD(model.parameters(), lr=1e-2)
+
+    # Define the loss function.
+    loss_fn = nn.CrossEntropyLoss()
+
+    # Train the model.
+    losses, accuracies = [], []
+    model.train()
+    for X, y in tqdm(train_dataloader):
+        X, y = X.view(X.size(0), -1).to(device), y.to(device)
+
+        l = model(X)  # Forward pass.
+        J = loss_fn(l, y)  # Compute the loss.
+        optimizer.zero_grad()  # Zero the gradients.
+        J.backward()  # Backward pass.
+        optimizer.step()  # Update the parameters.
+
+        losses.append(J.item())
+        accuracies.append(y.eq(l.detach().argmax(dim=1)).float().mean())
+
+    avg_loss = torch.tensor(losses).mean()
+    avg_accuracy = torch.tensor(accuracies).mean()
+
+    print(transform)
+    print(f"Avg. Training Loss: {avg_loss:.2f}")
+    print(f"Avg. Training Accuracy: {avg_accuracy:.2f}")
+    print()
 
 
 def val(transform):
