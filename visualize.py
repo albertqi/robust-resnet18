@@ -44,7 +44,7 @@ def visualize_all():
     plt.show()
 
 
-if __name__ == "__main__":
+def main():
     assert len(sys.argv) == 2
     should_visualize_all = sys.argv[1] == "1"
 
@@ -52,3 +52,7 @@ if __name__ == "__main__":
         visualize_all()
     else:
         visualize_transform(TRANFORM)
+
+
+if __name__ == "__main__":
+    main()
