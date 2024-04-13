@@ -9,7 +9,8 @@ from tqdm import tqdm
 
 
 NUM_EPOCHS = 50
-SUBSET_SIZE = 0.05
+TRAIN_SUBSET_SIZE = 0.05
+VAL_SUBSET_SIZE = 0.25
 
 
 class RandomTransform:
@@ -41,7 +42,7 @@ def main():
     # Load the training data.
     transform = RandomTransform(preprocessing, TRANSFORMS)
     train_dataset = ImageNet(DATA_DIR, split="train", transform=transform)
-    subset_size = int(SUBSET_SIZE * len(train_dataset))
+    subset_size = int(TRAIN_SUBSET_SIZE * len(train_dataset))
     subset_indices = torch.randperm(len(train_dataset))[:subset_size].tolist()
     sampler = SubsetRandomSampler(subset_indices)
     train_dataloader = DataLoader(
@@ -50,7 +51,7 @@ def main():
 
     # Load the validation data.
     val_dataset = ImageNet(DATA_DIR, split="val", transform=transform)
-    subset_size = int(SUBSET_SIZE * len(val_dataset))
+    subset_size = int(VAL_SUBSET_SIZE * len(val_dataset))
     subset_indices = torch.randperm(len(val_dataset))[:subset_size].tolist()
     sampler = SubsetRandomSampler(subset_indices)
     val_dataloader = DataLoader(
