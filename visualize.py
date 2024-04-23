@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import sys, torch
 from common import DATA_DIR, TRANSFORMS
-from torchvision.datasets import ImageNet
+from torchvision.datasets import CIFAR10
 
 
 TRANFORM = None  # Transformation to visualize.
@@ -11,7 +11,7 @@ def visualize_transform(transform):
     """Visualize the transformation."""
 
     # Load the data.
-    val_dataset = ImageNet(DATA_DIR, split="val", transform=transform)
+    val_dataset = CIFAR10(DATA_DIR, train=False, download=True, transform=transform)
 
     # Visualize the data.
     figure = plt.figure(figsize=(6, 6))
@@ -32,13 +32,12 @@ def visualize_all():
     figure = plt.figure(figsize=(6, 12))
     cols, rows = 2, 4
     for i in range(1, cols * rows + 1):
-        val_dataset = ImageNet(DATA_DIR, split="val", transform=TRANSFORMS[i - 1])
+        val_dataset = CIFAR10(DATA_DIR, train=False, download=True, transform=TRANSFORMS[i - 1])
         sample_idx = torch.randint(len(val_dataset), size=(1,)).item()
         img, _ = val_dataset[sample_idx]
         figure.add_subplot(rows, cols, i)
-        plt.title(
-            f"{TRANSFORMS[i - 1].__class__.__name__ if TRANSFORMS[i - 1] else 'None'}"
-        )
+        name = TRANSFORMS[i - 1].__class__.__name__
+        plt.title(f"{name if name != 'Identity' else 'None'}")
         plt.axis("off")
         plt.imshow(img)
     plt.show()

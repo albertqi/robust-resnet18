@@ -1,52 +1,35 @@
 import torch
-from common import BATCH_SIZE, DATA_DIR, TRAIN_TRANSFORM, TRANSFORMS, VAL_TRANSFORM
+from common import BATCH_SIZE, DATA_DIR, TRAIN_TRANSFORM, VAL_TRANSFORM
 from torch import nn
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
-from torchvision.models import resnet18
-from torchvision.transforms import v2
+from torchvision.models import resnet18, ResNet18_Weights
 from tqdm import tqdm
 
 
 NUM_EPOCHS = 10
 
 
-class RandomTransform:
-    """Randomly apply a transformation."""
+def pretrain():
+    """Pretrain the model."""
 
-    def __init__(self, preprocessing, transforms):
-        self.preprocessing = preprocessing
-        self.transforms = transforms
-
-    def __call__(self, img):
-        transform = self.transforms[
-            torch.randint(len(self.transforms), size=(1,)).item()
-        ]
-        compose = v2.Compose([transform, self.preprocessing])
-        return compose(img)
-
-
-def main():
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
     torch.multiprocessing.set_sharing_strategy("file_system")
 
     # Load the training data.
-    train_transform = RandomTransform(TRAIN_TRANSFORM, TRANSFORMS)
-    train_dataset = CIFAR10(DATA_DIR, train=True, download=True, transform=train_transform)
+    train_dataset = CIFAR10(DATA_DIR, train=True, download=True, transform=TRAIN_TRANSFORM)
     train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, num_workers=2, shuffle=True)
 
     # Load the validation data.
-    val_transform = RandomTransform(VAL_TRANSFORM, TRANSFORMS)
-    val_dataset = CIFAR10(DATA_DIR, train=False, download=True, transform=val_transform)
+    val_dataset = CIFAR10(DATA_DIR, train=False, download=True, transform=VAL_TRANSFORM)
     val_dataloader = DataLoader(val_dataset, batch_size=BATCH_SIZE, num_workers=2)
 
     # Define the model.
-    model = resnet18()
+    model = resnet18(weights=ResNet18_Weights.DEFAULT)
     model.fc = nn.Sequential(
         nn.Dropout(0.5),
         nn.Linear(512, 10),
     )
-    model.load_state_dict(torch.load("models/pretrained.pth"))
     model = model.to(device)
 
     # Define the optimizer.
@@ -101,7 +84,11 @@ def main():
         print()
 
     # Save the model.
-    torch.save(model.state_dict(), "models/robust.pth")
+    torch.save(model.state_dict(), "models/pretrained.pth")
+
+
+def main():
+    pretrain()
 
 
 if __name__ == "__main__":
