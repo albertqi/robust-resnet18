@@ -1,3 +1,4 @@
+import torch
 from torchvision.transforms import v2
 
 
@@ -21,10 +22,12 @@ TRANSFORMS = [
 TRAIN_TRANSFORM = v2.Compose([
     v2.RandomCrop(32, padding=4),
     v2.RandomHorizontalFlip(),
-    v2.ToTensor(),
+    v2.ToImage(),
+    v2.ToDtype(torch.float32, scale=True),
     v2.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
 ])
 VAL_TRANSFORM = v2.Compose([
-    v2.ToTensor(),
+    v2.ToImage(),
+    v2.ToDtype(torch.float32, scale=True),
     v2.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
 ])
