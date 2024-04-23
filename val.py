@@ -15,8 +15,8 @@ def val(transform, model_name):
     torch.multiprocessing.set_sharing_strategy("file_system")
 
     # Load the data.
-    transform = v2.Compose([transform, VAL_TRANSFORM])
-    val_dataset = CIFAR10(DATA_DIR, train=False, download=True, transform=transform)
+    val_transform = v2.Compose([transform, VAL_TRANSFORM])
+    val_dataset = CIFAR10(DATA_DIR, train=False, download=True, transform=val_transform)
     val_dataloader = DataLoader(val_dataset, batch_size=BATCH_SIZE, num_workers=2)
 
     # Define the model.
@@ -47,7 +47,7 @@ def val(transform, model_name):
     avg_loss = torch.tensor(losses).mean()
     avg_accuracy = torch.tensor(accuracies).mean()
 
-    print(transform)
+    print(transform.__class__.__name__)
     print(f"Avg. Validation Loss: {avg_loss:.2f}")
     print(f"Avg. Validation Accuracy: {avg_accuracy:.2f}")
     print()
