@@ -1,0 +1,40 @@
+Files already downloaded and verified
+Identity
+Avg. Validation Loss: 2.48
+Avg. Validation Accuracy: 0.45
+
+Files already downloaded and verified
+ElasticTransform
+Avg. Validation Loss: 6.75
+Avg. Validation Accuracy: 0.15
+
+Files already downloaded and verified
+RandomPerspective
+Avg. Validation Loss: 3.74
+Avg. Validation Accuracy: 0.26
+
+Files already downloaded and verified
+RandomRotation
+Avg. Validation Loss: 4.72
+Avg. Validation Accuracy: 0.23
+
+Files already downloaded and verified
+ColorJitter
+Avg. Validation Loss: 3.41
+Avg. Validation Accuracy: 0.34
+
+Files already downloaded and verified
+GaussianBlur
+Avg. Validation Loss: 0.95
+Avg. Validation Accuracy: 0.68
+
+Files already downloaded and verified
+RandomInvert
+Avg. Validation Loss: 4.89
+Avg. Validation Accuracy: 0.21
+
+Files already downloaded and verified
+RandomPosterize
+Avg. Validation Loss: 3.73
+Avg. Validation Accuracy: 0.31
+
